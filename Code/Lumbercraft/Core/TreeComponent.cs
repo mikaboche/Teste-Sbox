@@ -26,6 +26,14 @@ public sealed class TreeComponent : Component
 	[Property]
 	public GameObject WoodPickupPrefab { get; set; }
 
+	// ── Eventos para componentes visuais se inscreverem ──────────────────────
+	/// <summary>Disparado toda vez que a árvore recebe dano (antes de checar morte)</summary>
+	public Action OnDamageTaken;
+
+	/// <summary>Disparado quando a árvore morre, antes do ragdoll/destroy</summary>
+	public Action OnDied;
+	// ──────────────────────────────────────────────────────────────────────────
+
 	// Guarda a posição original para o efeito de shake
 	private Vector3 _originalPosition;
 	private bool _isDead = false;
@@ -46,6 +54,9 @@ public sealed class TreeComponent : Component
 		CurrentHP -= amount;
 		Log.Info( $"[Árvore] Dano recebido: {amount} | HP restante: {CurrentHP}/{MaxHP}" );
 
+		// Notifica componentes visuais antes do shake
+		OnDamageTaken?.Invoke();
+
 		// Efeito visual de shake ao receber dano
 		_ = ShakeEffect();
 
@@ -62,6 +73,9 @@ public sealed class TreeComponent : Component
 	{
 		_isDead = true;
 		Log.Info( $"[Árvore] Árvore derrubada! Dropando {WoodDrop} de madeira." );
+
+		// Notifica TreeVisual antes de ativar física (para spawnar fragmentos)
+		OnDied?.Invoke();
 
 		// Ativa física de ragdoll no ModelPhysics do GameObject
 		var physics = GameObject.GetComponent<ModelPhysics>();
@@ -82,13 +96,38 @@ public sealed class TreeComponent : Component
 			var pickup = WoodPickupPrefab.Clone( Transform.Position + Vector3.Up * 40f );
 			var woodComp = pickup.GetComponent<WoodPickup>();
 			if ( woodComp is not null )
-			{
 				woodComp.WoodAmount = WoodDrop;
-			}
+		}
+		else
+		{
+			// Fallback: cria pickup por código quando não há prefab configurado
+			SpawnWoodPickupFromCode();
 		}
 
 		// Desativa este componente (árvore morta não recebe mais dano)
 		Enabled = false;
+	}
+
+	/// <summary>
+	/// Cria um WoodPickup diretamente via código, sem precisar de prefab.
+	/// Usado pelo LumbercraftScene onde não há prefabs configurados.
+	/// </summary>
+	private void SpawnWoodPickupFromCode()
+	{
+		var pickupGo = new GameObject( true, "WoodPickup" );
+		pickupGo.SetParent( Scene );
+		pickupGo.WorldPosition = Transform.Position + Vector3.Up * 40f;
+
+		// Física do pickup
+		pickupGo.AddComponent<BoxCollider>();
+		pickupGo.AddComponent<Rigidbody>();
+
+		// Componente de gameplay
+		var pickup = pickupGo.AddComponent<WoodPickup>();
+		pickup.WoodAmount = WoodDrop;
+
+		// Visual do pickup (se WoodPickupVisual estiver disponível)
+		pickupGo.AddComponent<WoodPickupVisual>();
 	}
 
 	/// <summary>
