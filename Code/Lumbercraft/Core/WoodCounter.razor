@@ -1,0 +1,41 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+
+@*
+    HUD de debug do Lumbercraft.
+    Adicionar este componente a um GameObject que tenha um ScreenPanel.
+    Mostra a quantidade de madeira do jogador no canto superior esquerdo.
+*@
+
+<root>
+    <div class="wood-counter">
+        <label class="wood-label">🪵 Wood: @WoodDisplay</label>
+    </div>
+</root>
+
+@code
+{
+    /// <summary>
+    /// Busca o PlayerResources na cena e retorna o valor formatado.
+    /// Retorna "—" se nenhum jogador encontrado (para debug fácil).
+    /// </summary>
+    string WoodDisplay
+    {
+        get
+        {
+            var player = Scene.GetAllComponents<PlayerResources>().FirstOrDefault();
+            return player is not null ? player.Wood.ToString( "0" ) : "—";
+        }
+    }
+
+    /// <summary>
+    /// BuildHash determina quando o painel precisa re-renderizar.
+    /// Inclui o valor de Wood para atualizar em tempo real.
+    /// </summary>
+    protected override int BuildHash()
+    {
+        var player = Scene.GetAllComponents<PlayerResources>().FirstOrDefault();
+        return System.HashCode.Combine( player?.Wood ?? -1f );
+    }
+}

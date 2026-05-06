@@ -1,0 +1,37 @@
+/* HUD de madeira — canto superior esquerdo, texto branco simples */
+
+WoodCounter {
+    /* Ocupa a tela inteira em posição absoluta (padrão HUD s&box) */
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    /* Sem interação do mouse — o HUD não captura cliques */
+    pointer-events: none;
+
+    /* Conteúdo alinhado ao topo-esquerdo */
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    .wood-counter {
+        margin: 16px;
+        padding: 8px 14px;
+        background-color: rgba(0, 0, 0, 0.45);
+        border-radius: 6px;
+
+        /* Fade in suave ao aparecer */
+        transition: opacity 0.3s ease;
+        opacity: 1;
+        &:intro { opacity: 0; }
+    }
+
+    .wood-label {
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+}

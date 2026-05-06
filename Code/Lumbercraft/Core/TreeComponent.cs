@@ -93,6 +93,7 @@ public sealed class TreeComponent : Component
 
 	/// <summary>
 	/// Efeito de shake leve: desloca levemente o transform e volta à posição original.
+	/// Guard IsValid garante que não acessa transform de objeto já destruído.
 	/// </summary>
 	private async Task ShakeEffect()
 	{
@@ -102,6 +103,9 @@ public sealed class TreeComponent : Component
 
 		for ( int i = 0; i < steps; i++ )
 		{
+			// Para a animação se o componente foi destruído durante o shake
+			if ( !IsValid ) return;
+
 			var offset = new Vector3(
 				Game.Random.Float( -magnitude, magnitude ),
 				Game.Random.Float( -magnitude, magnitude ),
@@ -111,7 +115,8 @@ public sealed class TreeComponent : Component
 			await Task.DelaySeconds( stepDelay );
 		}
 
-		// Retorna à posição original
-		Transform.LocalPosition = _originalPosition;
+		// Retorna à posição original (se ainda existir)
+		if ( IsValid )
+			Transform.LocalPosition = _originalPosition;
 	}
 }
