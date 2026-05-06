@@ -1,0 +1,14 @@
+{
+  "Title": "S&Box Pro - Inventory",
+  "Type": "library",
+  "Org": "local",
+  "Ident": "sboxpro_inventory",
+  "Schema": 1,
+  "IncludeSourceFiles": false,
+  "Resources": null,
+  "PackageReferences": [],
+  "EditorReferences": null,
+  "Mounts": null,
+  "IsStandaloneOnly": false,
+  "Metadata": {}
+}
